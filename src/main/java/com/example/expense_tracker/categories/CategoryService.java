@@ -9,6 +9,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -21,24 +22,15 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    List<CategoryModel> defaultCategoriesList;
-
     @PostConstruct
     public void initDefaultCategories() {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            InputStream defaultCategories = new ClassPathResource("defaultCategories.json").getInputStream();
-            defaultCategoriesList = objectMapper.readValue(defaultCategories, new TypeReference<List<CategoryModel>>() {
-            });
-
-            for (CategoryModel category : defaultCategoriesList) {
-                if (!categoryRepository.existsById(category.getId())) {
-                    categoryRepository.save(category);
-                }
+            for (CategoryModel category : getDefaultCategoriesList()) {
+                if (!categoryRepository.existsById(category.getId())) categoryRepository.save(category);
             }
             log.debug("\nDefault categories initialized successfully.");
         } catch (Exception e) {
-            log.error("Unable initialize default categories.\n Error: {}", e.getMessage(), e);
+            log.error("Unable to initialize default categories.\n Error: {}", e.getMessage(), e);
         }
     }
 
@@ -68,10 +60,8 @@ public class CategoryService {
         CategoryModel existingCategory = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
 
-        for (CategoryModel defaultCategory : defaultCategoriesList) {
-            if (categoryId.equalsIgnoreCase(defaultCategory.getId()))
-                throw new RuntimeException("Default categories can not be edited");
-        }
+        if (isDefaultCategory(categoryId))
+            throw new RuntimeException("Default categories can not be edited");
 
         if (category.getDescription() != null) existingCategory.setDescription(category.getDescription());
         categoryRepository.save(existingCategory);
@@ -80,13 +70,46 @@ public class CategoryService {
 
     public APIResponse deleteCategory(String categoryId) {
         categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
-
-        for (CategoryModel defaultCategory : defaultCategoriesList) {
-            if (categoryId.equalsIgnoreCase(defaultCategory.getId()))
-                throw new RuntimeException("Default categories can not be deleted");
-        }
+        if (isDefaultCategory(categoryId))
+            throw new RuntimeException("Default categories can not be deleted");
 
         categoryRepository.deleteById(categoryId);
         return new APIResponse(categoryId, "Deleted");
+    }
+
+    public List<CategoryModel> getDefaultCategoriesList() {
+        List<CategoryModel> defaultCategoriesList = Collections.emptyList();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            InputStream defaultCategories = new ClassPathResource("defaultCategories.json").getInputStream();
+            defaultCategoriesList = objectMapper.readValue(defaultCategories, new TypeReference<List<CategoryModel>>() {
+            });
+            return defaultCategoriesList;
+        } catch (Exception e) {
+            log.error("Unable to get default category list.\n Error: {}", e.getMessage(), e);
+        }
+        return defaultCategoriesList;
+    }
+
+    public boolean isDefaultCategory(String categoryId) {
+        boolean isDefaultCategory = false;
+        for (CategoryModel category : getDefaultCategoriesList()) {
+            if (categoryId.equalsIgnoreCase(category.getId())) {
+                isDefaultCategory = true;
+                break;
+            }
+        }
+        return isDefaultCategory;
+    }
+
+    public boolean isCategoryExists(String categoryId) {
+        boolean isCategoryExists = false;
+        for (CategoryModel category : categoryRepository.findAll()) {
+            if (categoryId.equalsIgnoreCase(category.getId())) {
+                isCategoryExists = true;
+                break;
+            }
+        }
+        return isCategoryExists;
     }
 }
