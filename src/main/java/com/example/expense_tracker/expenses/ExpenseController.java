@@ -1,6 +1,9 @@
 package com.example.expense_tracker.expenses;
 
+import com.example.expense_tracker.utility.APIResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,43 +12,40 @@ import java.util.List;
 @RequestMapping("/expenses")
 public class ExpenseController {
 
-    private final ExpenseRepository repo;
+    private final ExpenseService expenseService;
 
-    public ExpenseController(ExpenseRepository repo) {
-        this.repo = repo;
+    public ExpenseController(ExpenseService expenseService) {
+        this.expenseService = expenseService;
     }
 
     @GetMapping()
     public List<ExpenseModel> getExpenses(@RequestParam(required = false) String category) {
-        if (category != null) {
-            return repo.findAllByCategory(category);
-        }
-        return repo.findAll();
+        return expenseService.getAllExpenses(category);
     }
 
     @GetMapping("/{expenseId}")
     public ExpenseModel getExpense(@PathVariable Integer expenseId) {
-        return repo.findById(expenseId).orElse(null);
+        return expenseService.getExpense(expenseId);
     }
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public ExpenseModel createExpense(@RequestBody ExpenseModel expense) {
-        return repo.save(expense);
+    public ResponseEntity<APIResponse> createExpense(@Valid @RequestBody ExpenseModel expense) {
+        APIResponse response = expenseService.createExpense(expense);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
     @PutMapping("/{expenseId}")
-    public String updateExpense(
+    public ResponseEntity<APIResponse> updateExpense(
             @PathVariable Integer expenseId,
-            @RequestBody ExpenseModel expense) {
-        repo.save(expense);
-        return "Updated";
+            @Valid @RequestBody ExpenseModel expense) {
+        APIResponse response = expenseService.updateExpense(expenseId, expense);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("/{expenseId}")
-    public String deleteExpense(@PathVariable Integer expenseId) {
-        repo.deleteById(expenseId);
-        return "deleted";
+    public ResponseEntity<APIResponse> deleteExpense(@PathVariable Integer expenseId) {
+        APIResponse response = expenseService.deleteExpense(expenseId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

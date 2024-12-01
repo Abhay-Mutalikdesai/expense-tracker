@@ -1,46 +1,48 @@
 package com.example.expense_tracker.categories;
 
+import com.example.expense_tracker.utility.APIResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
-    private final CategoryRepository repo;
+    private final CategoryService categoryService;
 
-    public CategoryController(CategoryRepository repo) {
-        this.repo = repo;
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
     @GetMapping
     public List<CategoryModel> getCategories() {
-        return repo.findAll();
+        return categoryService.getAllCategories();
     }
 
-    @GetMapping("/{category}")
-    public CategoryModel getCategory(@PathVariable String category) {
-        return repo.findById(category).orElse(null);
+    @GetMapping("/{categoryId}")
+    public CategoryModel getCategory(@PathVariable String categoryId) {
+        return categoryService.getCategory(categoryId);
     }
 
     @PostMapping
-    public String createCategory(@RequestBody CategoryModel category) {
-        repo.save(category);
-        return "Created";
+    public ResponseEntity<APIResponse> createCategory(@RequestBody CategoryModel category) {
+        APIResponse response = categoryService.createCategory(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/{category}")
-    public String updateCategory(
-            @PathVariable String category,
-            @RequestBody CategoryModel categoryBody) {
-        repo.save(categoryBody);
-        return "Updated";
+    @PutMapping("/{categoryId}")
+    public ResponseEntity<APIResponse> updateCategory(
+            @PathVariable String categoryId,
+            @RequestBody CategoryModel category) {
+        APIResponse response = categoryService.updateCategoryDescription(categoryId, category);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @DeleteMapping("/{category}")
-    public String deleteCategory(@PathVariable String category) {
-        repo.deleteById(category);
-        return "Deleted";
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<APIResponse> deleteCategory(@PathVariable String categoryId) {
+        APIResponse response = categoryService.deleteCategory(categoryId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

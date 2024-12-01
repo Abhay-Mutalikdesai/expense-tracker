@@ -1,4 +1,4 @@
-package com.example.expense_tracker.common;
+package com.example.expense_tracker.utility;
 
 public class Constants {
     public static final String STATUS_SUCCESS = "Success";

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "foodAndDrinks",
+    "category": "Food & Drinks",
+    "description": "Expenses related to dining out and beverages."
+  },
+  {
+    "id": "grocery",
+    "category": "Grocery",
+    "description": "Expenses for household groceries and supplies."
+  },
+  {
+    "id": "travel",
+    "category": "Travel",
+    "description": "Expenses related to trips, vacations, and travel activities."
+  },
+  {
+    "id": "billsAndUtilities",
+    "category": "Bills & Utilities",
+    "description": "Payments for utilities like electricity, water, and internet."
+  },
+  {
+    "id": "shopping",
+    "category": "Shopping",
+    "description": "Expenses for clothes, accessories, and general shopping."
+  },
+  {
+    "id": "transport",
+    "category": "Transport",
+    "description": "Daily commute and other transport-related expenses."
+  },
+  {
+    "id": "fuel",
+    "category": "Fuel",
+    "description": "Expenses for vehicle fuel and related costs."
+  },
+  {
+    "id": "investments",
+    "category": "Investments",
+    "description": "Money allocated for savings, stocks, or other investments."
+  },
+  {
+    "id": "education",
+    "category": "Education",
+    "description": "Expenses for tuition, books, and other educational needs."
+  },
+  {
+    "id": "fitness",
+    "category": "Fitness",
+    "description": "Expenses for gym memberships, fitness classes, and sports."
+  },
+  {
+    "id": "medical",
+    "category": "Medical",
+    "description": "Expenses for healthcare, medicines, and medical treatments."
+  },
+  {
+    "id": "rent",
+    "category": "Rent",
+    "description": "Monthly payments for rented properties."
+  },
+  {
+    "id": "personalCare",
+    "category": "Personal Care",
+    "description": "Expenses for grooming, beauty products, and self-care."
+  },
+  {
+    "id": "entertainment",
+    "category": "Entertainment",
+    "description": "Expenses for movies, games, and other leisure activities."
+  }
+]
