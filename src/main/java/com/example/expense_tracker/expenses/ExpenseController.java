@@ -1,6 +1,6 @@
 package com.example.expense_tracker.expenses;
 
-import com.example.expense_tracker.utility.APIResponse;
+import com.example.expense_tracker.utility.SuccessResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,22 +30,22 @@ public class ExpenseController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<APIResponse> createExpense(@Valid @RequestBody ExpenseModel expense) {
-        APIResponse response = expenseService.createExpense(expense);
+    public ResponseEntity<SuccessResponse> createExpense(@Valid @RequestBody ExpenseModel expense) {
+        SuccessResponse response = expenseService.createExpense(expense);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{expenseId}")
-    public ResponseEntity<APIResponse> updateExpense(
+    public ResponseEntity<SuccessResponse> updateExpense(
             @PathVariable Integer expenseId,
             @Valid @RequestBody ExpenseModel expense) {
-        APIResponse response = expenseService.updateExpense(expenseId, expense);
+        SuccessResponse response = expenseService.updateExpense(expenseId, expense);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("/{expenseId}")
-    public ResponseEntity<APIResponse> deleteExpense(@PathVariable Integer expenseId) {
-        APIResponse response = expenseService.deleteExpense(expenseId);
+    public ResponseEntity<SuccessResponse> deleteExpense(@PathVariable Integer expenseId) {
+        SuccessResponse response = expenseService.deleteExpense(expenseId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

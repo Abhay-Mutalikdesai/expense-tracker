@@ -1,8 +1,11 @@
 package com.example.expense_tracker.categories;
 
-import com.example.expense_tracker.utility.APIResponse;
+import com.example.expense_tracker.exception.IllegalOperationException;
+import com.example.expense_tracker.exception.ResourceNotFoundException;
+import com.example.expense_tracker.utility.SuccessResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
@@ -34,47 +37,49 @@ public class CategoryService {
         }
     }
 
-    public List<CategoryModel> getAllCategories() {
-        return categoryRepository.findAll();
-    }
-
-    public CategoryModel getCategory(String categoryId) {
-        categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
-        return categoryRepository.findById(categoryId).orElse(null);
-    }
-
-    public APIResponse createCategory(CategoryModel category) {
+    public SuccessResponse createCategory(CategoryModel category) {
+        if (StringUtils.isBlank(category.getCategory()))
+            throw new IllegalOperationException("Please provide valid category name.");
         String categoryId = category.getCategory().replace(" ", "").toLowerCase();
         if (categoryRepository.findById(categoryId).isPresent())
-            throw new RuntimeException("Category already present with id: " + categoryId);
+            throw new IllegalOperationException("Category already present with id: " + categoryId);
 
         CategoryModel newCategory = new CategoryModel();
         newCategory.setId(categoryId);
         newCategory.setCategory(category.getCategory());
         if (category.getDescription() != null) newCategory.setDescription(category.getDescription());
         categoryRepository.save(newCategory);
-        return new APIResponse(newCategory.getId(), "Created");
+        return new SuccessResponse(newCategory.getId(), "Created");
     }
 
-    public APIResponse updateCategoryDescription(String categoryId, CategoryModel category) {
+    public SuccessResponse updateCategoryDescription(String categoryId, CategoryModel category) {
         CategoryModel existingCategory = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
 
         if (isDefaultCategory(categoryId))
-            throw new RuntimeException("Default categories can not be edited");
+            throw new IllegalOperationException("Default categories can not be edited");
 
         if (category.getDescription() != null) existingCategory.setDescription(category.getDescription());
         categoryRepository.save(existingCategory);
-        return new APIResponse(categoryId, "Updated");
+        return new SuccessResponse(categoryId, "Updated");
     }
 
-    public APIResponse deleteCategory(String categoryId) {
-        categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+    public SuccessResponse deleteCategory(String categoryId) {
+        categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
         if (isDefaultCategory(categoryId))
-            throw new RuntimeException("Default categories can not be deleted");
+            throw new IllegalOperationException("Default categories can not be deleted");
 
         categoryRepository.deleteById(categoryId);
-        return new APIResponse(categoryId, "Deleted");
+        return new SuccessResponse(categoryId, "Deleted");
+    }
+
+    public CategoryModel getCategory(String categoryId) {
+        categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+        return categoryRepository.findById(categoryId).orElse(null);
+    }
+
+    public List<CategoryModel> getAllCategories() {
+        return categoryRepository.findAll();
     }
 
     public List<CategoryModel> getDefaultCategoriesList() {

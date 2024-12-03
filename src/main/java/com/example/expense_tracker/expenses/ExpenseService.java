@@ -1,7 +1,11 @@
 package com.example.expense_tracker.expenses;
 
 import com.example.expense_tracker.categories.CategoryService;
-import com.example.expense_tracker.utility.APIResponse;
+import com.example.expense_tracker.exception.IllegalOperationException;
+import com.example.expense_tracker.exception.ResourceNotFoundException;
+import com.example.expense_tracker.utility.SuccessResponse;
+import com.example.expense_tracker.utility.Constants;
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,20 +23,21 @@ public class ExpenseService {
         this.categoryService = categoryService;
     }
 
-    public APIResponse createExpense(ExpenseModel expense) {
+    public SuccessResponse createExpense(ExpenseModel expense) {
+        if (StringUtils.isBlank(expense.getCategory())) expense.setCategory(Constants.CATEGORY_OTHER);
         if (!categoryService.isCategoryExists(expense.getCategory()))
-            throw new RuntimeException("Category " + expense.getCategory() + " does not exists.");
+            throw new IllegalOperationException("Category " + expense.getCategory() + " does not exists.");
 
         ExpenseModel newExpense = expenseRepository.save(expense);
-        return new APIResponse(newExpense.getId().toString(), "Created");
+        return new SuccessResponse(newExpense.getId().toString(), "Created");
     }
 
-    public APIResponse updateExpense(Integer expenseId, ExpenseModel expense) {
+    public SuccessResponse updateExpense(Integer expenseId, ExpenseModel expense) {
         ExpenseModel existingExpense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with id: " + expenseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + expenseId));
 
         if (categoryService.isCategoryExists(expense.getCategory()))
-            throw new RuntimeException("Category " + expense.getCategory() + " does not exists.");
+            throw new IllegalOperationException("Category " + expense.getCategory() + " does not exists.");
 
         existingExpense.setTitle(expense.getTitle());
         existingExpense.setAmount(expense.getAmount());
@@ -41,21 +46,22 @@ public class ExpenseService {
         existingExpense.setTimeOfTransaction(expense.getTimeOfTransaction());
 
         expenseRepository.save(existingExpense);
-        return new APIResponse(expenseId.toString(), "Updated");
+        return new SuccessResponse(expenseId.toString(), "Updated");
     }
 
-    public APIResponse deleteExpense(Integer expenseId) {
+    public SuccessResponse deleteExpense(Integer expenseId) {
         expenseRepository.deleteById(expenseId);
-        return new APIResponse(expenseId.toString(), "Deleted");
+        return new SuccessResponse(expenseId.toString(), "Deleted");
     }
 
     public ExpenseModel getExpense(Integer expenseId) {
+        expenseRepository.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + expenseId));
         return expenseRepository.findById(expenseId).orElse(null);
     }
 
     public List<ExpenseModel> getAllExpenses(String category) {
-        if (category != null) {
-            return expenseRepository.findAllByCategory(category);
+        if (StringUtils.isNotBlank(category)) {
+            return expenseRepository.findAllByCategory(category.toLowerCase());
         }
         return expenseRepository.findAll();
     }

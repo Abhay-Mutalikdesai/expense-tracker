@@ -68,5 +68,10 @@
     "id": "entertainment",
     "category": "Entertainment",
     "description": "Expenses for movies, games, and other leisure activities."
+  },
+  {
+    "id": "other",
+    "category": "Other",
+    "description": "Expenses which can't be categorized."
   }
 ]
