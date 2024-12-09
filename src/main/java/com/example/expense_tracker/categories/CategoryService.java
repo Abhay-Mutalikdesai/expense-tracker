@@ -99,7 +99,7 @@ public class CategoryService {
     public boolean isDefaultCategory(String categoryId) {
         boolean isDefaultCategory = false;
         for (CategoryModel category : getDefaultCategoriesList()) {
-            if (categoryId.equalsIgnoreCase(category.getId())) {
+            if (categoryId.equals(category.getId())) {
                 isDefaultCategory = true;
                 break;
             }
@@ -110,7 +110,7 @@ public class CategoryService {
     public boolean isCategoryExists(String categoryId) {
         boolean isCategoryExists = false;
         for (CategoryModel category : categoryRepository.findAll()) {
-            if (categoryId.equalsIgnoreCase(category.getId())) {
+            if (categoryId.equals(category.getId())) {
                 isCategoryExists = true;
                 break;
             }

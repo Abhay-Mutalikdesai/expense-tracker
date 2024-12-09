@@ -12,7 +12,6 @@ import lombok.Data;
 public class CategoryModel {
     @Id
     private String id;
-    @NotEmpty
     private String category;
     private String description;
 }

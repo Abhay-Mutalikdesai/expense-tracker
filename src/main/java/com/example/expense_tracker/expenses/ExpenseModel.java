@@ -21,7 +21,7 @@ public class ExpenseModel {
     @NotEmpty
     private String title;
     @Positive
-    private Float amount;
+    private Double amount;
     private String description;
     private String category;
     @JsonFormat(pattern = "dd-MM-yyyy' 'HH:mm:ss")

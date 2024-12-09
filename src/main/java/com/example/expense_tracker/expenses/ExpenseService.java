@@ -50,19 +50,39 @@ public class ExpenseService {
     }
 
     public SuccessResponse deleteExpense(Integer expenseId) {
+        expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + expenseId));
         expenseRepository.deleteById(expenseId);
         return new SuccessResponse(expenseId.toString(), "Deleted");
     }
 
     public ExpenseModel getExpense(Integer expenseId) {
-        expenseRepository.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + expenseId));
+        expenseRepository.findById(expenseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + expenseId));
         return expenseRepository.findById(expenseId).orElse(null);
     }
 
     public List<ExpenseModel> getAllExpenses(String category) {
-        if (StringUtils.isNotBlank(category)) {
-            return expenseRepository.findAllByCategory(category.toLowerCase());
-        }
+        if (StringUtils.isNotBlank(category)) return expenseRepository.findAllByCategory(category);
         return expenseRepository.findAll();
+    }
+
+    public ExpenseSummaryModel getExpenseSummary(String category) {
+        List<ExpenseModel> expenseList;
+        if (StringUtils.isNotBlank(category)) {
+            if (!categoryService.isCategoryExists(category))
+                throw new IllegalOperationException("Category " + category + " does not exists.");
+            expenseList = expenseRepository.findAllByCategory(category);
+        } else expenseList = expenseRepository.findAll();
+
+        ExpenseSummaryModel expenseSummary = new ExpenseSummaryModel();
+        if (expenseList.isEmpty()) {
+            expenseSummary.setTotalExpense(0.0);
+            expenseSummary.setExpenseList(expenseList);
+        } else {
+            expenseSummary.setTotalExpense(expenseList.stream().mapToDouble(ExpenseModel::getAmount).sum());
+            expenseSummary.setExpenseList(expenseList);
+        }
+        return expenseSummary;
     }
 }

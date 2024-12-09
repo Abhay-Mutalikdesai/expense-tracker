@@ -48,4 +48,9 @@ public class ExpenseController {
         SuccessResponse response = expenseService.deleteExpense(expenseId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @GetMapping("/summary")
+    public ExpenseSummaryModel getExpenseSummary(@RequestParam(required = false) String category) {
+        return expenseService.getExpenseSummary(category);
+    }
 }
