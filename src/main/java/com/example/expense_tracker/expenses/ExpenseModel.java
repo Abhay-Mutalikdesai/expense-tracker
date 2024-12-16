@@ -18,12 +18,13 @@ public class ExpenseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
-    @NotEmpty
+    @NotBlank
     private String title;
-    @Positive
+    @Positive @NotBlank
     private Double amount;
     private String description;
     private String category;
     @JsonFormat(pattern = "dd-MM-yyyy' 'HH:mm:ss")
+    @NotBlank @PastOrPresent
     private LocalDateTime timeOfTransaction = LocalDateTime.now();
 }
