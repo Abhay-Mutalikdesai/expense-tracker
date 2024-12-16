@@ -1,6 +1,8 @@
 package com.example.expense_tracker.exception;
 
+import com.example.expense_tracker.utility.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,8 +16,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> baseException(BaseException e) {
         log.error("BaseException: {}", e.getErrorMessage(), e);
-        ErrorResponse errorResponse = new ErrorResponse(e.getStatusCode(), e.getErrorMessage());
-        return ResponseEntity.status(e.getStatusCode()).body(errorResponse);
+        ErrorResponse errorResponse = new ErrorResponse(e.getErrorMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -23,7 +25,7 @@ public class GlobalExceptionHandler {
         String errorMessage = e.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                 .collect(Collectors.joining(", "));
-        ErrorResponse errorResponse = new ErrorResponse(e.getStatusCode().value(), errorMessage);
-        return ResponseEntity.status(e.getStatusCode()).body(errorResponse);
+        ErrorResponse errorResponse = new ErrorResponse(errorMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(errorResponse);
     }
 }
