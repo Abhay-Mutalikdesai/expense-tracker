@@ -2,6 +2,8 @@ package com.example.expense_tracker.categories;
 
 import com.example.expense_tracker.exception.IllegalOperationException;
 import com.example.expense_tracker.exception.ResourceNotFoundException;
+import com.example.expense_tracker.utility.Constants;
+import com.example.expense_tracker.utility.MessageUtil;
 import com.example.expense_tracker.utility.SuccessResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,9 +22,11 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final MessageUtil messageUtil;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, MessageUtil messageUtil) {
         this.categoryRepository = categoryRepository;
+        this.messageUtil = messageUtil;
     }
 
     @PostConstruct
@@ -39,42 +43,42 @@ public class CategoryService {
 
     public SuccessResponse createCategory(CategoryModel category) {
         if (StringUtils.isBlank(category.getCategory()))
-            throw new IllegalOperationException("Please provide valid category name.");
+            throw new IllegalOperationException(messageUtil.getMessage(Constants.INVALID_CATEGORY));
         String categoryId = category.getCategory().replace(" ", "").toLowerCase();
         if (categoryRepository.findById(categoryId).isPresent())
-            throw new IllegalOperationException("Category already present with id: " + categoryId);
+            throw new IllegalOperationException(messageUtil.getMessage(Constants.CATEGORY_ALREADY_PRESENT, categoryId));
 
         CategoryModel newCategory = new CategoryModel();
         newCategory.setId(categoryId);
         newCategory.setCategory(category.getCategory());
         if (category.getDescription() != null) newCategory.setDescription(category.getDescription());
         categoryRepository.save(newCategory);
-        return new SuccessResponse(newCategory.getId(), "Created");
+        return new SuccessResponse(newCategory.getId(), messageUtil.getMessage(Constants.CATEGORY_CREATED));
     }
 
     public SuccessResponse updateCategoryDescription(String categoryId, CategoryModel category) {
         CategoryModel existingCategory = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage(Constants.CATEGORY_ID_NOT_FOUND, categoryId)));
 
         if (isDefaultCategory(categoryId))
-            throw new IllegalOperationException("Default categories can not be edited");
+            throw new IllegalOperationException(messageUtil.getMessage(Constants.DEFAULT_CATEGORY_EDIT));
 
         if (category.getDescription() != null) existingCategory.setDescription(category.getDescription());
         categoryRepository.save(existingCategory);
-        return new SuccessResponse(categoryId, "Updated");
+        return new SuccessResponse(categoryId, messageUtil.getMessage(Constants.CATEGORY_UPDATED));
     }
 
     public SuccessResponse deleteCategory(String categoryId) {
-        categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+        categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage(Constants.CATEGORY_ID_NOT_FOUND, categoryId)));
         if (isDefaultCategory(categoryId))
-            throw new IllegalOperationException("Default categories can not be deleted");
+            throw new IllegalOperationException(messageUtil.getMessage(Constants.DEFAULT_CATEGORY_DELETE));
 
         categoryRepository.deleteById(categoryId);
-        return new SuccessResponse(categoryId, "Deleted");
+        return new SuccessResponse(categoryId, messageUtil.getMessage(Constants.CATEGORY_DELETED));
     }
 
     public CategoryModel getCategory(String categoryId) {
-        categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+        categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage(Constants.CATEGORY_ID_NOT_FOUND, categoryId)));
         return categoryRepository.findById(categoryId).orElse(null);
     }
 

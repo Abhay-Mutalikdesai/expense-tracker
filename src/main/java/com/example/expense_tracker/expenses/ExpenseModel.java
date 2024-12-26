@@ -20,11 +20,10 @@ public class ExpenseModel {
     private Integer id;
     @NotBlank
     private String title;
-    @Positive @NotBlank
+    @NotNull @Positive
     private Double amount;
     private String description;
     private String category;
-    @JsonFormat(pattern = "dd-MM-yyyy' 'HH:mm:ss")
-    @NotBlank @PastOrPresent
+    @JsonFormat(pattern = "dd-MM-yyyy' 'HH:mm:ss") @PastOrPresent
     private LocalDateTime timeOfTransaction = LocalDateTime.now();
 }
