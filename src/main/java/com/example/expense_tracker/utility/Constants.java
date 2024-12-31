@@ -19,6 +19,7 @@ public class Constants {
     public static final String CATEGORY_ALREADY_PRESENT = CATEGORY_MSG_PREFIX + PREFIX_SEPARATOR + "7";
     public static final String CATEGORY_ID_NOT_FOUND = CATEGORY_MSG_PREFIX + PREFIX_SEPARATOR + "8";
     public static final String CATEGORY_NOT_EXISTS = CATEGORY_MSG_PREFIX + PREFIX_SEPARATOR + "9";
+    public static final String CATEGORY_IN_USE = CATEGORY_MSG_PREFIX + PREFIX_SEPARATOR + "10";
 
     public static final String EXPENSE_CREATED = EXPENSE_MSG_PREFIX + PREFIX_SEPARATOR + "1";
     public static final String EXPENSE_UPDATED = EXPENSE_MSG_PREFIX + PREFIX_SEPARATOR + "2";
