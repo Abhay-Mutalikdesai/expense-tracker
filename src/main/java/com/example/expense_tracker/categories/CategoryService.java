@@ -2,7 +2,7 @@ package com.example.expense_tracker.categories;
 
 import com.example.expense_tracker.exception.IllegalOperationException;
 import com.example.expense_tracker.exception.ResourceNotFoundException;
-import com.example.expense_tracker.expenses.ExpenseService;
+import com.example.expense_tracker.expenses.ExpenseRepository;
 import com.example.expense_tracker.utility.Constants;
 import com.example.expense_tracker.utility.MessageUtil;
 import com.example.expense_tracker.utility.SuccessResponse;
@@ -23,12 +23,12 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final ExpenseService expenseService;
+    private final ExpenseRepository expenseRepository;
     private final MessageUtil messageUtil;
 
-    public CategoryService(CategoryRepository categoryRepository, ExpenseService expenseService, MessageUtil messageUtil) {
+    public CategoryService(CategoryRepository categoryRepository, ExpenseRepository expenseRepository, MessageUtil messageUtil) {
         this.categoryRepository = categoryRepository;
-        this.expenseService = expenseService;
+        this.expenseRepository = expenseRepository;
         this.messageUtil = messageUtil;
     }
 
@@ -75,7 +75,7 @@ public class CategoryService {
         categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage(Constants.CATEGORY_ID_NOT_FOUND, categoryId)));
         if (isDefaultCategory(categoryId))
             throw new IllegalOperationException(messageUtil.getMessage(Constants.DEFAULT_CATEGORY_DELETE));
-        else if (!expenseService.getAllExpenses(categoryId).isEmpty())
+        else if (!expenseRepository.findAllByCategory(categoryId).isEmpty())
             throw new IllegalOperationException(messageUtil.getMessage(Constants.CATEGORY_IN_USE, categoryId));
         categoryRepository.deleteById(categoryId);
         return new SuccessResponse(categoryId, messageUtil.getMessage(Constants.CATEGORY_DELETED));
